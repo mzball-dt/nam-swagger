@@ -1,0 +1,305 @@
+openapi: 3.0.1
+info:
+  title: DCRUM API
+  description: 'The DCRUM RESTful API provides a json interface to the network and
+    application performance monitoring data captured by the CAS. '
+  version: v2017
+externalDocs:
+  description: More information about this API can be found in the Dynatrace Community
+  url: https://www.dynatrace.com/support/doc/nam/using-rest-based-web-services/
+servers:
+  - url: http://www.example.com/rest/dmiquery
+  - url: https://10.0.1.5/rest/dmiquery
+paths:
+  /getDMIData3:
+    post:
+      summary: Request DMI Data
+      requestBody:
+        description: The Data3 endpoint is the closest to a DMI report in data presentation. Responses to this endpoint include column headings and other display-related information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DMIPostBody'
+      responses:
+        200:
+          description: Response to a getDMIData3 request
+          content:
+            application/json:
+              schema:
+                title: getDMIData3 Response
+                type: object
+                properties:
+                  timeEnd:
+                    title: End time of retrieved dataset
+                    type: integer
+                    format: int32
+                    readOnly: true
+                  timeBegin:
+                    title: Start time of retrieved dataset
+                    type: integer
+                    format: int32
+                    readOnly: true
+                    x-oad-type: integer
+                  columnHeader:
+                    uniqueItems: true
+                    type: array
+                    readOnly: true
+                    items:
+                      type: string
+                  dmiServiceError:
+                    title: Information around errors during request
+                    type: array
+                    readOnly: true
+                    items:
+                      type: object
+                      properties: {}
+                  timeoutValue:
+                    title: Max query time - Timeout value
+                    type: integer
+                    format: int32
+                  columnRendererIds:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        type: string
+                  formattedData:
+                    title: String Formatted data
+                    type: array
+                    readOnly: true
+                    items:
+                      type: string
+                  columnHeaderName:
+                    type: array
+                    readOnly: true
+                    items:
+                      type: array
+                      items:
+                        type: string
+                  rawData:
+                    title: Raw data without any formatting
+                    type: array
+                    readOnly: true
+                    items:
+                      type: string
+                  columnUnit:
+                    type: array
+                    readOnly: true
+                    items:
+                      type: array
+                      items:
+                        type: string
+                  timeout:
+                    title: Timeout Status for query
+                    type: boolean
+  /getApplications:
+    get:
+      summary: Retrieve available datasets
+      responses:
+        200:
+          description: This is a list of available Datasets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/availableIDs'
+  /getDataViews:
+    get:
+      summary: Retrieve available dataviews for a dataset
+      parameters:
+        - name: appID
+          in: query
+          schema:
+            type: string
+            enum:
+              - CVENT
+              - AMD
+      responses:
+        200:
+          description: This is a list of available dataviews
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/availableIDs'
+  /getDimensions:
+    get:
+      summary: Retrieve available dataviews for a dataset
+      responses:
+        200:
+          description: good response
+  /getMetrics:
+    get:
+      summary: Retrieve available dataviews for a dataset
+      responses:
+        200:
+          description: good response
+components:
+  responses:
+    DMIData3_response:
+      description: Response to a getDMIData3 request
+      content:
+        application/json:
+          schema:
+            title: getDMIData3 Response
+            type: object
+            properties:
+              timeEnd:
+                title: End time of retrieved dataset
+                type: integer
+                format: int32
+                readOnly: true
+                x-oad-type: integer
+              timeBegin:
+                title: Start time of retrieved dataset
+                type: integer
+                format: int32
+                readOnly: true
+                x-oad-type: integer
+              columnHeader:
+                uniqueItems: true
+                type: array
+                readOnly: true
+                items:
+                  type: string
+              dmiServiceError:
+                title: Information around errors during request
+                type: array
+                readOnly: true
+                items:
+                  type: object
+                  properties: {}
+              timeoutValue:
+                title: Max query time - Timeout value
+                type: integer
+                format: int32
+              columnRendererIds:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+              formattedData:
+                title: String Formatted data
+                type: array
+                readOnly: true
+                items:
+                  type: string
+              columnHeaderName:
+                type: array
+                readOnly: true
+                items:
+                  type: array
+                  items:
+                    type: string
+              rawData:
+                title: Raw data without any formatting
+                type: array
+                readOnly: true
+                items:
+                  type: string
+              columnUnit:
+                type: array
+                readOnly: true
+                items:
+                  type: array
+                  items:
+                    type: string
+              timeout:
+                title: Timeout Status for query
+                type: boolean
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: DCRUMToken
+  schemas:
+    availableIDs:
+      title: getApplications Response
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int32
+          readOnly: true
+        resultsCount:
+          title: Number of data groupings returned
+          type: integer
+          format: int32
+          readOnly: true
+        count:
+          title: Number of data groupings returned
+          type: integer
+          format: int32
+        results:
+          title: List of Data groupings
+          type: array
+          items:
+            title: 'Data group ID and Name '
+            type: array
+            description: '[ AppID, AppNiceName ]'
+            items:
+              title: AppID
+              type: string
+    DMIPostBody:
+      title: JSON Request for getDMIData3
+      required: 
+        - appId
+        - dataSourceId
+        - dimensionIds
+        - timePeriod
+        - viewId
+      type: object
+      properties:
+        appId:
+          title: Type of Data to access
+          type: string
+          description: DCRUM groups data into 'applications' internally. The
+            most commonly used type of data is 'CVENT' or Application based
+            data
+          default: CVENT
+          enum:
+            - CVENT
+            - AV
+            - L2
+            - AMD
+            - ESM
+            - ALARMS
+            - SYSTEMDIAG
+        viewId:
+          title: Dataview
+          type: string
+          default: ClientView
+        dataSourceId:
+          title: Destination datasource
+          type: string
+          description: Which device in a cluster is this data being pulled from?
+          default: ALL_AGGR
+        dimensionIds:
+          title: Dimension list
+          type: array
+          items:
+            type: object
+        dimFilters:
+          type: array
+          items:
+            type: string
+        metricIds:
+          type: array
+          items:
+            type: string
+        metricFilters:
+          type: array
+          items:
+            type: string
+        top:
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            type: string
+        timePeriod:
+          type: string
+        resolution:
+          type: string
+security:
+  - bearerAuth: []
